@@ -32,29 +32,13 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("user", userSchema);
 
-User.createCollection()
-  .then((col) => {
-    console.log("Collection", col, "created");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-User.create({
-  email: "test@test.com",
-  username: "saroj",
-  fullname: "Test User",
-  title: "Software Developer",
-  skills: ["JS", "PHP", "JAVA"],
-  address: "Kathmnadu, Nepal",
-  job_type: "Full Time",
-  id: 1,
-  is_active: true,
-  followers: ["username123", "user234", "user543"],
-  followings: ["username123", "user234", "user543", "user555"],
-}).then(() => {
-  console.log("User created");
-});
+// User.createCollection()
+//   .then((col) => {
+//     console.log("Collection", "created");
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
 
 // http://localhost:5000 or http://localhost:5000/
 app.get("/", (req, res) => {
@@ -67,9 +51,36 @@ app.get("/api/v1/posts", (req, res) => {
   res.status(200).send(posts);
 });
 
-app.get("/api/v1/user", (req, res) => {
-  const user = fs.readFileSync("./data/user.json", "utf-8").toString();
-  res.status(200).send(user);
+app.get("/api/v1/user", async (req, res) => {
+  // const user = fs.readFileSync("./data/user.json", "utf-8").toString();
+  const user = await User.find({ id: 1 });
+  res.status(200).send(user[0]);
+});
+
+app.post("/api/v1/user", async (req, resp) => {
+  const lastUser = await User.findOne({}, null, { sort: { id: -1 } });
+
+  let id = 1;
+  if (lastUser) {
+    id = lastUser.id + 1;
+  }
+  const newUser = {
+    email: "test@test.com",
+    username: "saroj",
+    fullname: "Test User",
+    title: "Software Developer",
+    skills: ["JS", "PHP", "JAVA"],
+    address: "Kathmnadu, Nepal",
+    job_type: "Full Time",
+    id: id,
+    is_active: true,
+    followers: [],
+    followings: [],
+  };
+  User.create(newUser).then((createdUser) => {
+    console.log("User created");
+    resp.status(200).send(createdUser);
+  });
 });
 
 app.listen(PORT, () => {
