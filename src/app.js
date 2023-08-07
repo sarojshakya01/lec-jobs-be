@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(cors());
 
 const PORT = 5001; // api port
@@ -20,7 +20,7 @@ mongoose.connect(mongoDbURI, {
 
 const userSchema = new mongoose.Schema({
   email: String,
-  username: String,
+  username: { type: String, unique: true },
   password: String,
   fullname: String,
   title: String,
@@ -47,19 +47,29 @@ app.get("/api/v1/user", async (req, res) => {
   res.status(200).send(users[0]);
 });
 
+// login api
+app.post("/api/v1/login", async (req, res) => {
+  const user = await User.findOne({
+    username: req.body.username,
+    password: req.body.password,
+    is_active: true,
+  });
+  if (user) {
+    res.status(200).send({ message: "Login successfull", data: user });
+  } else {
+    res.status(400).send({ error: "Invalid username or password" });
+  }
+});
+
 app.post("/api/v1/user", async (req, resp) => {
   const lastUser = await User.findOne({}, null, { sort: { id: -1 } });
 
-  const {
-    username,
-    email,
-    fullname,
-    title,
-    job_type,
-    skills,
-    address,
-    password,
-  } = req.body;
+  const { username, email, fullname, title, job_type, skills, address, password } = req.body;
+
+  const usernameUser = await User.findOne({ username });
+  if (usernameUser) {
+    return resp.status(400).send({ error: "Username already taken" });
+  }
 
   let id = 1;
   if (lastUser) {
@@ -79,10 +89,15 @@ app.post("/api/v1/user", async (req, resp) => {
     followers: [],
     followings: [],
   };
-  User.create(newUser).then((createdUser) => {
-    console.log("User created");
-    resp.status(200).send(createdUser);
-  });
+  User.create(newUser)
+    .then((createdUser) => {
+      console.log("User created");
+      resp.status(200).send(createdUser);
+    })
+    .catch((err) => {
+      console.error(err);
+      resp.status(500).send({ error: "Can not process your reqest" });
+    });
 });
 /*************** USER APIs begins ********************/
 
