@@ -61,8 +61,8 @@ const User = mongoose.model("user", userSchema);
 app.get("/api/v1/user/:id", async (req, res) => {
   const id = req.params.id;
   console.log("get user called");
-  const users = await User.find({ id });
-  res.status(200).send(users[0]);
+  const user = await User.findOne({ id });
+  res.status(200).send(user);
 });
 
 // login api
