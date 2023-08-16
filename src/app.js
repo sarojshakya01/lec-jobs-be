@@ -58,9 +58,10 @@ app.get("/", (req, res) => {
 /*************** USER APIs begins ********************/
 const User = mongoose.model("user", userSchema);
 
-app.get("/api/v1/user", async (req, res) => {
+app.get("/api/v1/user/:id", async (req, res) => {
+  const id = req.params.id;
   console.log("get user called");
-  const users = await User.find({ id: 1 });
+  const users = await User.find({ id });
   res.status(200).send(users[0]);
 });
 
