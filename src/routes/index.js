@@ -17,7 +17,7 @@ router.get("/", (req, res) => {
 });
 
 /*************** USER APIs begins ********************/
-router.get("/api/v1/user", getUser);
+router.get("/api/v1/user/:id", getUser);
 
 // login api
 router.post("/api/v1/login", loginUser);

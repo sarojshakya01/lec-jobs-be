@@ -1,9 +1,10 @@
 const { User } = require("../db/model");
 
 const getUser = async (req, res) => {
+const id = req.params.id;
   console.log("get user called");
-  const users = await User.find({ id: 1 });
-  res.status(200).send(users[0]);
+  const user = await User.findOne({ id });
+  res.status(200).send(user);
 };
 
 const loginUser = async (req, res) => {
