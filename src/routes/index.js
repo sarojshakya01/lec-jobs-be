@@ -17,7 +17,7 @@ router.post("/api/v1/login", loginUser);
 
 router.post("/api/v1/user", signUpUser);
 
-app.get("/api/v1/user/:id/suggestions", getSuggestions);
+router.get("/api/v1/user/:id/suggestions", getSuggestions);
 /*************** USER APIs ends ********************/
 
 /*************** POST APIs begins ********************/
