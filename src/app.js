@@ -65,6 +65,22 @@ app.get("/api/v1/user/:id", async (req, res) => {
   res.status(200).send(user);
 });
 
+app.get("/api/v1/user/:id/suggestions", async (req, res) => {
+  const id = req.params.id;
+  console.log("get user called");
+  const me = await User.find({ id });
+  let followings = [];
+  if (me) {
+    followings = me.followings;
+  } else {
+    return res.status(404).send({ error: "User not found" });
+  }
+
+  followings.push(me.username);
+  const users = await User.find({ username: { $nin: followings } });
+  res.status(200).send(users);
+});
+
 // login api
 app.post("/api/v1/login", async (req, res) => {
   console.log("logged in");
@@ -81,10 +97,19 @@ app.post("/api/v1/login", async (req, res) => {
 });
 
 app.post("/api/v1/user", async (req, res) => {
-  console.log("sign up")
+  console.log("sign up");
   const lastUser = await User.findOne({}, null, { sort: { id: -1 } });
 
-  const { username, email, fullname, title, job_type, skills, address, password } = req.body;
+  const {
+    username,
+    email,
+    fullname,
+    title,
+    job_type,
+    skills,
+    address,
+    password,
+  } = req.body;
 
   const usernameUser = await User.findOne({ username });
   if (usernameUser) {
@@ -137,7 +162,17 @@ app.post("/api/v1/post", async (req, res) => {
   console.log("create post");
   const lastPost = await Post.findOne({}, null, { sort: { id: -1 } });
 
-  const { title, description, location, job_type, pay_rate_per_hr_dollar, skills, user_id, post_by_username, post_by_fullname } = req.body;
+  const {
+    title,
+    description,
+    location,
+    job_type,
+    pay_rate_per_hr_dollar,
+    skills,
+    user_id,
+    post_by_username,
+    post_by_fullname,
+  } = req.body;
 
   let id = 1;
   if (lastPost) {
@@ -244,8 +279,8 @@ app.post("/api/v1/post/:id/comment", async (req, res) => {
     const currentComments = post.comments;
     let commentId = 1;
     if (currentComments.length) {
-      const sortedComments = currentComments.sort((a, b) => (a.id - b.id))
-      commentId = sortedComments[0].id + 1
+      const sortedComments = currentComments.sort((a, b) => a.id - b.id);
+      commentId = sortedComments[0].id + 1;
     }
     comment.id = commentId;
 
@@ -276,8 +311,8 @@ app.delete("/api/v1/post/:id/comment/:cid", async (req, res) => {
 
   if (post) {
     const currentComments = post.comments;
-    const newComments = currentComments.filter(c => c.id !== parseInt(cid));
-    
+    const newComments = currentComments.filter((c) => c.id !== parseInt(cid));
+
     Post.findOneAndUpdate(
       { id },
       { $set: { comments: newComments } },
@@ -294,8 +329,6 @@ app.delete("/api/v1/post/:id/comment/:cid", async (req, res) => {
   } else {
     res.status(500).send({ error: "Can not process your request" });
   }
-
-  
 });
 /*************** POST APIs ends ********************/
 
