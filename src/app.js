@@ -68,7 +68,7 @@ app.get("/api/v1/user/:id", async (req, res) => {
 app.get("/api/v1/user/:id/suggestions", async (req, res) => {
   const id = req.params.id;
   console.log("get user called");
-  const me = await User.find({ id });
+  const me = await User.findOne({ id });
   let followings = [];
   if (me) {
     followings = me.followings;
